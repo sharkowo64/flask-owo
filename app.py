@@ -1,43 +1,42 @@
 from flask import Flask, request, abort
 from linebot import LineBotApi, WebhookHandler
+from linebot.exceptions import InvalidSignatureError
 from linebot.models import MessageEvent, TextMessage, TextSendMessage
 import os
 
 app = Flask(__name__)
 
-# 從環境變數中獲取 Channel Secret 和 Channel Access Token
-LINE_CHANNEL_SECRET = os.getenv('LINE_CHANNEL_SECRET')
-LINE_CHANNEL_ACCESS_TOKEN = os.getenv('LINE_CHANNEL_ACCESS_TOKEN')
+# 設定 LINE Channel Access Token 和 Secret
+LINE_CHANNEL_ACCESS_TOKEN = os.getenv("LINE_CHANNEL_ACCESS_TOKEN")
+LINE_CHANNEL_SECRET = os.getenv("LINE_CHANNEL_SECRET")
 
 line_bot_api = LineBotApi(LINE_CHANNEL_ACCESS_TOKEN)
 line_handler = WebhookHandler(LINE_CHANNEL_SECRET)
+@app.route('/')
+def home():
+    return "LINE BOT 首頁"
 
-# 設定 /callback 路徑來接收 LINE Webhook
-@app.route("/callback", methods=['POST'])
+@app.route("/callback", methods=["POST"])
 def callback():
-    signature = request.headers['X-Line-Signature']
+    signature = request.headers["X-Line-Signature"]
     body = request.get_data(as_text=True)
 
     try:
-        # 驗證來自 LINE 的訊息
         line_handler.handle(body, signature)
-    except Exception as e:
-        print(f"Error: {e}")
+    except InvalidSignatureError:
         abort(400)
 
-    return 'OK'
+    return "OK"
 
-# 當收到訊息事件時回應
 @line_handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
     user_message = event.message.text
-    # 回應用戶發送的訊息
+    reply_message = f"你說了：{user_message}"
+    
     line_bot_api.reply_message(
         event.reply_token,
-        TextSendMessage(text=f'你說: {user_message}')
+        TextSendMessage(text=reply_message)
     )
 
-# Vercel 要求的入口點
-def vercel_main(req, res):
-    with app.wsgi_app:
-        return app.full_dispatch_request()
+if __name__ == "__main__":
+    app.run(port=8000)
