@@ -14,7 +14,7 @@ line_bot_api = LineBotApi(LINE_CHANNEL_ACCESS_TOKEN)
 line_handler = WebhookHandler(LINE_CHANNEL_SECRET)
 @app.route('/')
 def home():
-    return "LINE BOT 首頁"
+    return "owo"
 
 @app.route("/callback", methods=["POST"])
 def callback():
