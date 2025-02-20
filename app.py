@@ -38,4 +38,5 @@ def handle_message(event):
          TextSendMessage(text=reply_message)
      )
 
-
+if __name__ == "__main__":
+     app.run(port=8000)
