@@ -42,7 +42,7 @@ def handle_message(event):
                {"role": "system", "content": "你是一個智能機器人管家"},
                {
                     "role": "user",
-                    "content":input()
+                    "content":user_message
                }
           ]
      )
